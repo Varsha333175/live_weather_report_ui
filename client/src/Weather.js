@@ -1,4 +1,3 @@
-// src/Weather.js
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
@@ -22,11 +21,13 @@ const Weather = ({ lat, lon }) => {
   const [forecastType, setForecastType] = useState('hourly');
   const [forecastData, setForecastData] = useState(null);
   const [stormAlerts, setStormAlerts] = useState(null);
+  const [airQuality, setAirQuality] = useState(null);
 
   useEffect(() => {
     if (lat && lon) {
       fetchForecastData();
       fetchAlerts();
+      fetchAirQuality();
     }
   }, [lat, lon, forecastType]);
 
@@ -66,6 +67,15 @@ const Weather = ({ lat, lon }) => {
     }
   };
 
+  const fetchAirQuality = async () => {
+    try {
+      const response = await axios.get(`/api/airquality?lat=${lat}&lon=${lon}`);
+      setAirQuality(response.data);
+    } catch (error) {
+      console.error('Error fetching air quality data:', error);
+    }
+  };
+
   const isDaytime = (time) => {
     const hours = new Date(time).getHours();
     return hours >= 6 && hours < 18;
@@ -83,6 +93,16 @@ const Weather = ({ lat, lon }) => {
     if (condition.includes('Snow')) return <WiSnow />;
     if (condition.includes('Thunderstorm')) return <WiThunderstorm />;
     return daytime ? <WiDaySunny /> : <WiNightClear />;
+  };
+
+  // Function to determine AQI category color
+  const getAirQualityColor = (aqi) => {
+    if (aqi <= 50) return 'good'; // Green
+    if (aqi <= 100) return 'moderate'; // Yellow
+    if (aqi <= 150) return 'unhealthy-sensitive'; // Orange
+    if (aqi <= 200) return 'unhealthy'; // Red
+    if (aqi <= 300) return 'very-unhealthy'; // Purple
+    return 'hazardous'; // Maroon
   };
 
   return (
@@ -113,6 +133,19 @@ const Weather = ({ lat, lon }) => {
         </div>
       ) : (
         <p>Loading {forecastType} weather data...</p>
+      )}
+
+      {/* Air Quality Section */}
+      {airQuality ? (
+        <div className={`air-quality ${getAirQualityColor(airQuality.AQI)}`}>
+          <h2>Air Quality Index (AQI)</h2>
+          <p><strong>Date Observed:</strong> {airQuality.DateObserved}</p>
+          <p><strong>Pollutant:</strong> {airQuality.Pollutant}</p>
+          <p><strong>AQI:</strong> {airQuality.AQI}</p>
+          <p><strong>Category:</strong> {airQuality.Category}</p>
+        </div>
+      ) : (
+        <p>Loading air quality data...</p>
       )}
 
       <div className="alerts-section">

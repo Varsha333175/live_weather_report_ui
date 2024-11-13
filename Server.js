@@ -265,6 +265,52 @@ app.get('/api/satellite', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch satellite imagery' });
   }
 });
+/**
+ * @swagger
+ * /api/airquality:
+ *   get:
+ *     summary: Get air quality data for a specific location
+ *     parameters:
+ *       - in: query
+ *         name: lat
+ *         schema:
+ *           type: number
+ *         required: true
+ *         description: Latitude of the location
+ *       - in: query
+ *         name: lon
+ *         schema:
+ *           type: number
+ *         required: true
+ *         description: Longitude of the location
+ *     responses:
+ *       200:
+ *         description: Air quality data retrieved successfully
+ */
+app.get('/api/airquality', async (req, res) => {
+  const { lat, lon } = req.query;
+
+  try {
+    const airQualityUrl = `http://www.airnowapi.org/aq/observation/latLong/current?format=application/json&latitude=${lat}&longitude=${lon}&distance=25&API_KEY=${process.env.AIRNOW_API_KEY}`;
+    
+    const airQualityResponse = await axios.get(airQualityUrl);
+    
+    if (airQualityResponse.data.length > 0) {
+      const airQualityData = airQualityResponse.data[0];
+      res.json({
+        DateObserved: airQualityData.DateObserved,
+        AQI: airQualityData.AQI,
+        Category: airQualityData.Category.Name,
+        Pollutant: airQualityData.ParameterName,
+      });
+    } else {
+      res.status(404).json({ error: 'No air quality data found for the given location.' });
+    }
+  } catch (error) {
+    console.error('Error fetching air quality data:', error.message);
+    res.status(500).json({ error: 'Failed to fetch air quality data' });
+  }
+});
 
 
 const PORT = process.env.PORT || 5000;

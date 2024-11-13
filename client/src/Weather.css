@@ -162,3 +162,47 @@
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
   margin-top: 10px;
 }
+/* Air Quality Section Styling */
+.air-quality {
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+  color: white;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.air-quality h2 {
+  font-size: 1.5em;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.air-quality p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+/* Colors based on AQI */
+.air-quality.good {
+  background-color: #4caf50; /* Green for Good */
+}
+
+.air-quality.moderate {
+  background-color: #ffeb3b; /* Yellow for Moderate */
+}
+
+.air-quality.unhealthy-sensitive {
+  background-color: #ff9800; /* Orange for Unhealthy for Sensitive Groups */
+}
+
+.air-quality.unhealthy {
+  background-color: #f44336; /* Red for Unhealthy */
+}
+
+.air-quality.very-unhealthy {
+  background-color: #9c27b0; /* Purple for Very Unhealthy */
+}
+
+.air-quality.hazardous {
+  background-color: #d32f2f; /* Maroon for Hazardous */
+}
