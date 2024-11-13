@@ -1,0 +1,21 @@
+/* General Styles for App */
+.App {
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* Night Mode Styling */
+.night-mode {
+  background: linear-gradient(to bottom, #2c3e50, #1c2833); /* Darker gradient background */
+  color: #e0e6ed; /* Lighter color for readability */
+}
+
+/* Header Styling */
+/* App Title */
+h1 {
+  text-align: center;
+  color: #ffffff;
+  font-size: 2em;
+  margin: 20px 0;
+  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+}
