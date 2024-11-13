@@ -7,6 +7,33 @@
   background-color: transparent;
 }
 
+/* Forecast Buttons */
+.forecast-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.forecast-buttons button {
+  background-color: #2c3e50;
+  color: #ffffff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.forecast-buttons button:hover {
+  background-color: #1a252f;
+}
+
+.forecast-buttons button:focus {
+  outline: none;
+  background-color: #34495e;
+}
+
 /* Horizontal Forecast List */
 .forecast-list {
   display: flex;
@@ -78,8 +105,8 @@
 
 /* Alerts Section Styling */
 .alerts-section {
-  background-color: rgba(255, 69, 58, 0.2); /* Light red background with transparency */
-  border-left: 4px solid #ff4444; /* Distinct left border for alerts */
+  background-color: rgba(255, 69, 58, 0.2);
+  border-left: 4px solid #ff4444;
   border-radius: 8px;
   padding: 20px;
   margin: 20px 0;
@@ -89,14 +116,14 @@
 
 .alert-title {
   font-size: 1.5em;
-  color: #ff4444; /* Red color to emphasize alerts */
+  color: #ff4444;
   text-align: left;
   margin-bottom: 10px;
   font-weight: bold;
 }
 
 .alert-item {
-  background-color: rgba(255, 255, 255, 0.1); /* Light transparent background */
+  background-color: rgba(255, 255, 255, 0.1);
   border: 1px solid #ffdddd;
   border-radius: 8px;
   padding: 15px;
@@ -106,12 +133,12 @@
 .alert-item p {
   margin: 5px 0;
   font-size: 14px;
-  color: #f8d7da; /* Soft red/pink for alert details */
+  color: #f8d7da;
 }
 
 /* Satellite View Section Styling */
 .satellite-view {
-  background-color: rgba(0, 0, 0, 0.3); /* Darker background with transparency */
+  background-color: rgba(0, 0, 0, 0.3);
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
@@ -124,7 +151,7 @@
   margin-bottom: 15px;
   text-align: left;
   font-weight: bold;
-  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3); /* Soft shadow for better visibility */
+  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* Satellite Image Styling */
@@ -132,6 +159,6 @@
   width: 100%;
   height: auto;
   border-radius: 8px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5); /* Shadow around image */
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
   margin-top: 10px;
 }

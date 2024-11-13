@@ -19,22 +19,41 @@ import {
 import './Weather.css';
 
 const Weather = ({ lat, lon }) => {
-  const [hourlyForecast, setHourlyForecast] = useState(null);
+  const [forecastType, setForecastType] = useState('hourly');
+  const [forecastData, setForecastData] = useState(null);
   const [stormAlerts, setStormAlerts] = useState(null);
 
   useEffect(() => {
     if (lat && lon) {
-      fetchWeather();
+      fetchForecastData();
       fetchAlerts();
     }
-  }, [lat, lon]);
+  }, [lat, lon, forecastType]);
 
-  const fetchWeather = async () => {
+  const fetchForecastData = async () => {
+    let endpoint;
+    switch (forecastType) {
+      case 'daily':
+        endpoint = '/api/weather/daily';
+        break;
+      case '10days':
+        endpoint = '/api/weather/10days';
+        break;
+      default:
+        endpoint = '/api/weather';
+    }
+
     try {
-      const response = await axios.get(`/api/weather?lat=${lat}&lon=${lon}`);
-      setHourlyForecast(response.data.hourlyForecast);
+      const response = await axios.get(`${endpoint}?lat=${lat}&lon=${lon}`);
+      setForecastData(
+        forecastType === 'hourly'
+          ? response.data.hourlyForecast
+          : forecastType === 'daily'
+          ? response.data.dailyForecast
+          : response.data.next10DaysForecast
+      );
     } catch (error) {
-      console.error('Error fetching weather data:', error);
+      console.error(`Error fetching ${forecastType} weather data:`, error);
     }
   };
 
@@ -54,59 +73,50 @@ const Weather = ({ lat, lon }) => {
 
   const getWeatherIcon = (condition, time) => {
     const daytime = isDaytime(time);
-
     if (condition === 'Clear') {
-      return daytime ? <WiDaySunny className="weather-icon sunny" /> : <WiNightClear className="weather-icon clear-night" />;
+      return daytime ? <WiDaySunny /> : <WiNightClear />;
     }
-    if (condition === 'Mostly Sunny') {
-      return <WiDaySunnyOvercast className="weather-icon mostly-sunny" />;
+    if (condition.includes('Sunny') || condition.includes('Cloudy')) {
+      return daytime ? <WiDaySunnyOvercast /> : <WiNightAltCloudy />;
     }
-    if (condition === 'Partly Sunny' || condition === 'Partly Cloudy') {
-      return daytime ? <WiDayCloudy className="weather-icon partly-sunny" /> : <WiNightAltPartlyCloudy className="weather-icon partly-cloudy-night" />;
-    }
-    if (condition === 'Mostly Cloudy') {
-      return daytime ? <WiDayCloudy className="weather-icon mostly-cloudy" /> : <WiNightAltCloudy className="weather-icon mostly-cloudy-night" />;
-    }
-    if (condition === 'Cloudy') {
-      return <WiCloud className="weather-icon cloudy" />;
-    }
-    if (condition === 'Rain' || condition === 'Showers') {
-      return daytime ? <WiDayRainMix className="weather-icon rain-day" /> : <WiNightAltRainMix className="weather-icon rain-night" />;
-    }
-    if (condition === 'Snow') {
-      return <WiSnow className="weather-icon snow" />;
-    }
-    if (condition === 'Thunderstorm') {
-      return <WiThunderstorm className="weather-icon thunderstorm" />;
-    }
-    return daytime ? <WiDaySunny className="weather-icon default-day" /> : <WiNightClear className="weather-icon default-night" />;
+    if (condition.includes('Rain')) return <WiRain />;
+    if (condition.includes('Snow')) return <WiSnow />;
+    if (condition.includes('Thunderstorm')) return <WiThunderstorm />;
+    return daytime ? <WiDaySunny /> : <WiNightClear />;
   };
 
   return (
     <div className="weather-container">
-      <h1>Hourly Weather Forecast</h1>
-      {hourlyForecast ? (
+      <h1>Weather Forecast</h1>
+      <div className="forecast-buttons">
+        <button onClick={() => setForecastType('hourly')}>Hourly</button>
+        <button onClick={() => setForecastType('daily')}>Daily</button>
+        <button onClick={() => setForecastType('10days')}>Next 10 Days</button>
+      </div>
+
+      {forecastData ? (
         <div className="forecast-list">
-          {hourlyForecast.slice(0, 12).map((hour, index) => (
-            <div key={index} className={`forecast-item ${hour.condition.toLowerCase().replace(" ", "-")}`}>
+          {forecastData.map((data, index) => (
+            <div key={index} className="forecast-item">
               <div className="icon-container">
-                {getWeatherIcon(hour.condition, hour.startTime)}
+                {getWeatherIcon(data.condition, data.startTime || data.date)}
               </div>
-              <p className="time">{new Date(hour.startTime).toLocaleString()}</p>
-              <p className="temperature">{hour.temperature}°C</p>
-              <p className="condition">{hour.condition}</p>
-              <p className="wind">Wind: {hour.windSpeed} from {hour.windDirection}</p>
-              <p className="precipitation">Precipitation: {hour.precipitationProbability}%</p>
-              <p className="humidity">Humidity: {hour.humidity}%</p>
+              <p className="time">{data.startTime ? new Date(data.startTime).toLocaleString() : data.date}</p>
+              <p className="temperature">{data.temperature || data.temperatureHigh}°C</p>
+              <p className="condition">{data.condition}</p>
+              <p className="wind">Wind: {data.windSpeed} from {data.windDirection}</p>
+              <p className="precipitation">Precipitation: {data.precipitationProbability || 'N/A'}%</p>
+              <p className="humidity">Humidity: {data.humidity || 'N/A'}%</p>
+              <p className="details">{data.detailedForecast}</p>
             </div>
           ))}
         </div>
       ) : (
-        <p>Loading hourly weather data...</p>
+        <p>Loading {forecastType} weather data...</p>
       )}
 
       <div className="alerts-section">
-        <h2 className="alert-title">Active Storm Alerts</h2>
+        <h2>Active Storm Alerts</h2>
         {stormAlerts ? (
           stormAlerts.length > 0 ? (
             stormAlerts.map((alert, index) => (
@@ -114,9 +124,6 @@ const Weather = ({ lat, lon }) => {
                 <p><strong>Event:</strong> {alert.event}</p>
                 <p><strong>Severity:</strong> {alert.severity}</p>
                 <p><strong>Description:</strong> {alert.description}</p>
-                <p><strong>Instructions:</strong> {alert.instruction}</p>
-                <p><strong>Effective:</strong> {new Date(alert.effective).toLocaleString()}</p>
-                <p><strong>Expires:</strong> {new Date(alert.expires).toLocaleString()}</p>
               </div>
             ))
           ) : (

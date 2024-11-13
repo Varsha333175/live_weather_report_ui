@@ -56,6 +56,7 @@ app.get('/api/weather', async (req, res) => {
     const pointsResponse = await axios.get(`https://api.weather.gov/points/${lat},${lon}`);
     const { forecastHourly, forecastGridData } = pointsResponse.data.properties;
 
+    // Get hourly forecast
     const forecastResponse = await axios.get(forecastHourly);
     const hourlyForecast = forecastResponse.data.properties.periods.map(period => ({
       startTime: period.startTime,
@@ -66,6 +67,7 @@ app.get('/api/weather', async (req, res) => {
       detailedForecast: period.detailedForecast || '',
     }));
 
+    // Get additional grid data like humidity and precipitation
     const gridResponse = await axios.get(forecastGridData);
     const gridProperties = gridResponse.data.properties;
 
@@ -81,7 +83,6 @@ app.get('/api/weather', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch weather data' });
   }
 });
-
 /**
  * @swagger
  * /api/alerts:
@@ -128,6 +129,103 @@ app.get('/api/alerts', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch storm alerts' });
   }
 });
+
+
+/**
+ * @swagger
+ * /api/weather/daily:
+ *   get:
+ *     summary: Get daily weather data for a specific location
+ *     parameters:
+ *       - in: query
+ *         name: lat
+ *         schema:
+ *           type: number
+ *         required: true
+ *         description: Latitude of the location
+ *       - in: query
+ *         name: lon
+ *         schema:
+ *           type: number
+ *         required: true
+ *         description: Longitude of the location
+ *     responses:
+ *       200:
+ *         description: Daily weather data retrieved successfully
+ */
+app.get('/api/weather/daily', async (req, res) => {
+  const { lat, lon } = req.query;
+
+  try {
+    const pointsResponse = await axios.get(`https://api.weather.gov/points/${lat},${lon}`);
+    const forecastResponse = await axios.get(pointsResponse.data.properties.forecast);
+
+    const dailyForecast = forecastResponse.data.properties.periods.map(period => ({
+      date: period.startTime.split('T')[0],
+      temperatureHigh: period.temperature,
+      condition: period.shortForecast,
+      windSpeed: period.windSpeed,
+      windDirection: period.windDirection,
+      detailedForecast: period.detailedForecast,
+      precipitationProbability: period.probabilityOfPrecipitation?.value || 'N/A',
+      humidity: period.relativeHumidity?.value || 'N/A',
+    }));
+
+    res.json({ dailyForecast });
+  } catch (error) {
+    console.error('Error fetching daily weather data:', error.message);
+    res.status(500).json({ error: 'Failed to fetch daily weather data' });
+  }
+});
+
+
+/**
+ * @swagger
+ * /api/weather/10days:
+ *   get:
+ *     summary: Get 10-day weather forecast data for a specific location
+ *     parameters:
+ *       - in: query
+ *         name: lat
+ *         schema:
+ *           type: number
+ *         required: true
+ *         description: Latitude of the location
+ *       - in: query
+ *         name: lon
+ *         schema:
+ *           type: number
+ *         required: true
+ *         description: Longitude of the location
+ *     responses:
+ *       200:
+ *         description: 10-day weather data retrieved successfully
+ */
+app.get('/api/weather/10days', async (req, res) => {
+  const { lat, lon } = req.query;
+
+  try {
+    const pointsResponse = await axios.get(`https://api.weather.gov/points/${lat},${lon}`);
+    const forecastResponse = await axios.get(pointsResponse.data.properties.forecast);
+
+    const next10DaysForecast = forecastResponse.data.properties.periods.slice(0, 10).map(period => ({
+      date: period.startTime.split('T')[0],
+      temperatureHigh: period.temperature,
+      condition: period.shortForecast,
+      windSpeed: period.windSpeed,
+      windDirection: period.windDirection,
+      detailedForecast: period.detailedForecast,
+      precipitationProbability: period.probabilityOfPrecipitation?.value || 'N/A',
+      humidity: period.relativeHumidity?.value || 'N/A',
+    }));
+
+    res.json({ next10DaysForecast });
+  } catch (error) {
+    console.error('Error fetching 10-day weather data:', error.message);
+    res.status(500).json({ error: 'Failed to fetch 10-day weather data' });
+  }
+});
+
 
 /**
  * @swagger
