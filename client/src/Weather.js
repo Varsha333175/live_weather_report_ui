@@ -5,15 +5,10 @@ import {
   WiNightClear,
   WiDayCloudy,
   WiNightAltCloudy,
-  WiCloud,
-  WiNightCloudy,
   WiRain,
   WiSnow,
   WiThunderstorm,
-  WiDayRainMix,
-  WiNightAltRainMix,
   WiDaySunnyOvercast,
-  WiNightAltPartlyCloudy,
 } from 'react-icons/wi';
 import './Weather.css';
 
@@ -76,13 +71,13 @@ const Weather = ({ lat, lon }) => {
     }
   };
 
-  const isDaytime = (time) => {
-    const hours = new Date(time).getHours();
-    return hours >= 6 && hours < 18;
+  const isDaytime = () => {
+    const localHours = new Date().getHours();  // Get local time
+    return localHours >= 6 && localHours < 18;  // Daytime is from 6 AM to 6 PM local time
   };
 
-  const getWeatherIcon = (condition, time) => {
-    const daytime = isDaytime(time);
+  const getWeatherIcon = (condition) => {
+    const daytime = isDaytime();
     if (condition === 'Clear') {
       return daytime ? <WiDaySunny /> : <WiNightClear />;
     }
@@ -119,10 +114,10 @@ const Weather = ({ lat, lon }) => {
           {forecastData.map((data, index) => (
             <div key={index} className="forecast-item">
               <div className="icon-container">
-                {getWeatherIcon(data.condition, data.startTime || data.date)}
+                {getWeatherIcon(data.condition)}
               </div>
               <p className="time">{data.startTime ? new Date(data.startTime).toLocaleString() : data.date}</p>
-              <p className="temperature">{data.temperature || data.temperatureHigh}°C</p>
+              <p className="temperature">{data.temperature || data.temperatureHigh}°F</p>
               <p className="condition">{data.condition}</p>
               <p className="wind">Wind: {data.windSpeed} from {data.windDirection}</p>
               <p className="precipitation">Precipitation: {data.precipitationProbability || 'N/A'}%</p>
